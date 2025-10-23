@@ -28,7 +28,7 @@ g1atps <- readland.tps("g1a.tps", readcurves = F, specID = "imageID")
 g1btps <- readland.tps("g1b.tps", readcurves = F, specID = "imageID")
 slide1 <- read.xlsx("slajding2.xlsx",sheetIndex =  1, header = T)
 slide1 <- as.matrix(slide1 [,-1])
-g1otps <- readland.tps("g1.tps", readcurves = F, specID = "imageID")
+
 # prehatching g2
 g2atps <- readland.tps("g2a.tps")
 g2btps <- readland.tps("g2b.tps") 
@@ -37,7 +37,7 @@ desno <- matrix(c( 21, 20, 19, 18, 17, 16, 15, 14, 13, 12 , 11, 25, 26, 27))
 parovi <- cbind(levo, desno)
 slide2 <- read.xlsx("slajding.xlsx",sheetIndex =  1, header = T)
 slide2 <- as.matrix(slide2 [,-1])
-g2otps <- readland.tps("g2.tps", readcurves = F, specID = "imageID")
+
 #factors
 faktg1  <- read.xlsx("FactorsGroup1.xlsx",sheetIndex =  1, header = T)
 faktg2 <- read.xlsx("FactorsGroup2.xlsx",sheetIndex =  1, header = T)
@@ -123,7 +123,7 @@ plot(meg2new)
 anova_resme1 <- list()
 #creating factor for stages
 s1 <- rep(faktg1$stage,2)
-#looping through each stage and performing measurement.error
+#looping throughout each stage and performing measurement.error
 for (i in unique(s1)){
   megidf <- rrpp.data.frame( lmk = two.d.array(gpag1me$coords[,,s1==i]) , id = ind1[s1==i],
                              rep = tackanje1[s1==i])
@@ -136,11 +136,11 @@ anova_resme1
 writeLines(capture.output(anova_resme1), "g1mes.txt")
 
 #measurement error by stages in prehatch
-#creating list for reults
+#creating list for results
 anova_resme2 <- list()
 #creating factor for stages
 s2 <- rep(faktg2$stage,2)
-#looping thru each stage and performing measurement.error
+#looping throughout each stage and performing measurement.error
 for (i in unique(s2)){
   megidf <- rrpp.data.frame( lmk = two.d.array(gpag2me$symm.shape[,,s2==i]) , id = ind2[s2==i],
                              rep = tackanje2[s2==i])
@@ -239,16 +239,18 @@ summary_data <- data.frame(
 
 p <- ggplot() +
   geom_point(data = data.frame(stage = faktg1$stage, cs = csg1), aes(x = stage, y = cs), size = 4, alpha = 0.15) +
-  
+  scale_y_continuous(labels = label_number(accuracy = 0.01))+
+ 
   geom_errorbar(data = summary_data, aes(x = summary_data[,1], ymin = summary_data[,2] - summary_data[,4],
                                          ymax = summary_data[,2] + summary_data[,4]), width = 0.2, size = 1) + 
   geom_point(data = csg1mean, aes(x = csg1mean[,1], y = csg1mean[,2]), size = 8) +
   labs(x = "Stage", y = "Centroid size (CS)")+ theme_bw() +
+  
   theme(axis.text.x = element_text(size = 23),
         axis.text.y = element_text(size = 23),
         axis.title.x = element_text(size = 23),
         axis.title.y = element_text(size = 23),panel.grid = element_blank())
-p + scale_x_discrete(labels = c(21,22,23,24,25))
+p  +scale_x_discrete(labels = c(21,22,23,24,25))
 dev.off()
 
 #g2 cs plot export
@@ -358,16 +360,22 @@ pcag1plot <- pcag1
 tiff('graphs/pcag1.tiff', width = 2680, height = 2680, units = "px", res = 300)
 
 par(mar = c(5, 5, 5, 5) + 0.1)
-plot(pcag1plot,  pch=21, cex = 1.5, bg = g1clr[as.factor(faktg1$stage)],  cex.axis = 1.5, cex.lab = 2)
+plot(pcag1plot,  pch=21, cex = 1.5, bg = g1clr[as.factor(faktg1$stage)],  cex.axis = 1.5, cex.lab = 2, yaxt = "n")
 polygon(x = st21poly[,1], y = st21poly[,2], col = alpha(g1clr[1],  0.5),border = NA)
 polygon(x = st22poly[,1], y = st22poly[,2], col = alpha(g1clr[2],  0.5),border = NA)
 polygon(x = st23poly[,1], y = st23poly[,2], col = alpha(g1clr[3],  0.5),border = NA)
 polygon(x = st24poly[,1], y = st24poly[,2], col = alpha(g1clr[4],  0.5),border = NA)
 polygon(x = st25poly[,1], y = st25poly[,2], col = alpha(g1clr[5],  0.5),border = NA)
+
+
 text(x = c(-0.15,-0.16, -0.01, 0.09,0.2),                           
      y = c(-0.14,0.09,0.121,0.09,0.01),
      labels = levels(as.factor(faktg1$stage)),
      col = "black", cex = 2)
+
+yticks <- axTicks(2)
+axis(2, at = yticks, labels = sprintf("%.2f", yticks), cex.axis = 1.5)
+
 dev.off()
 par(mar = c(5, 4, 4, 2) + 0.1)
 
@@ -577,13 +585,17 @@ par(mar = c(5,5, 5,5) + 0.1)
 #obtain scores
 sr1 <- plotAllometry(we1, size = as.numeric(as.factor(faktg1$stage)), logsz = F,method = "PredLine", col = g1clr[as.factor(faktg1$stage)],
                      bg =  g1clr[as.factor(faktg1$stage)],pch = 21,xlab="Stage", 
-                     ylab="Centroid size", cex = 4, xaxt="n", ylim = c(-0.4, 0.21),cex.lab= 1.5, cex.axis = 1)
+                     ylab="Centroid size", cex = 4, xaxt="n", ylim = c(-0.4, 0.21),cex.lab= 1.5, cex.axis = 1, axes = F, frame.plot = T)
 #obtain mean values of scores
 wey1 <- aggregate(sr1$plot_args$y, FUN = mean, by = list(sr1$plot_args$x))
 wey1
 #draw individuals
 points (x = sr1$plot_args$x, y = sr1[["RegScore"]], pch = 21,
         bg =   g1clr[as.factor(faktg1$stage)], cex = 2)
+
+yticks <- axTicks(2)
+axis(2, at = yticks, labels = sprintf("%.2f", yticks), cex.axis = 1)
+ 
 
 axis(side = 1, at=c(1,	2,	3,	4, 5), labels = levels(as.factor(faktg1$stage)),cex.lab= 1.5, cex.axis = 1.5)
 #draw means for stages
